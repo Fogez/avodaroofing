@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roofing Price Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-2xl font-bold mb-4">Roofing Price Calculator</h1>
+        <div>
+            <label for="roofType">Roof Type:</label>
+            <select id="roofType" class="w-full p-2 mb-4 border rounded">
+                <option value="shingles">Shingles</option>
+                <option value="corrugated">Corrugated Steel</option>
+                <option value="standing-seam">Standing Seam Steel</option>
+            </select>
+        </div>
+        <div>
+            <label for="squareFootage">Square Footage:</label>
+            <input type="number" id="squareFootage" class="w-full p-2 mb-4 border rounded" placeholder="Enter square footage">
+        </div>
+        <div>
+            <label for="tearOffLayers">Tear Off Layers:</label>
+            <select id="tearOffLayers" class="w-full p-2 mb-4 border rounded">
+                <option value="1">1 layer</option>
+                <option value="2">2 layers</option>
+                <option value="3+">3+ layers</option>
+            </select>
+        </div>
+        <div>
+            <label for="slope">Slope:</label>
+            <select id="slope" class="w-full p-2 mb-4 border rounded">
+                <option value="1/12-6/12">1/12 - 6/12</option>
+                <option value="7/12-9/12">7/12 - 9/12</option>
+                <option value="10/12-12/12">10/12 - 12/12</option>
+            </select>
+        </div>
+        <div>
+            <label for="complexity">Complexity:</label>
+            <select id="complexity" class="w-full p-2 mb-4 border rounded">
+                <option value="ranch">Ranch style</option>
+                <option value="hips-and-valleys">Hips and valleys</option>
+            </select>
+        </div>
+        <div id="hipsAndValleysContainer" style="display: none;">
+            <label for="hipsAndValleys">Feet of Hips and Valleys:</label>
+            <input type="number" id="hipsAndValleys" class="w-full p-2 mb-4 border rounded" placeholder="Enter feet of hips and valleys">
+        </div>
+        <div>
+            <label for="sheetingReplaced">Sheeting Replaced (squares):</label>
+            <input type="number" id="sheetingReplaced" class="w-full p-2 mb-4 border rounded" placeholder="Enter squares of sheeting replaced">
+        </div>
+        <div id="sheetingTypeContainer">
+            <label for="sheetingType">Sheeting Type:</label>
+            <select id="sheetingType" class="w-full p-2 mb-4 border rounded">
+                <option value="osb">OSB</option>
+                <option value="plywood">Plywood</option>
+            </select>
+        </div>
+        <button onclick="calculatePrice()" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Calculate Price</button>
+        <div id="result" class="mt-4 text-lg font-bold"></div>
+    </div>
+
+    <script>
+        function updateUI() {
+            const roofType = document.getElementById('roofType').value;
+            const complexitySelect = document.getElementById('complexity');
+            const hipsAndValleysContainer = document.getElementById('hipsAndValleysContainer');
+            const slopeSelect = document.getElementById('slope');
+            const sheetingTypeContainer = document.getElementById('sheetingTypeContainer');
+
+            // Update slope options based on roof type
+            slopeSelect.innerHTML = '';
+            if (roofType === 'shingles') {
+                slopeSelect.innerHTML = `
+                    <option value="1/12-6/12">1/12 - 6/12</option>
+                    <option value="7/12-9/12">7/12 - 9/12</option>
+                    <option value="10/12-12/12">10/12 - 12/12</option>
+                `;
+            } else {
+                slopeSelect.innerHTML = `
+                    <option value="1/12-8/12">1/12 - 8/12</option>
+                    <option value="9/12-12/12">9/12 - 12/12</option>
+                `;
+            }
+
+            // Show/hide hips and valleys input
+            hipsAndValleysContainer.style.display = complexitySelect.value === 'hips-and-valleys' ? 'block' : 'none';
+
+            // Show/hide sheeting type for non-shingle roofs
+            sheetingTypeContainer.style.display = roofType !== 'shingles' ? 'block' : 'none';
+        }
+
+        function calculatePrice() {
+            const roofType = document.getElementById('roofType').value;
+            const squareFootage = parseFloat(document.getElementById('squareFootage').value);
+            const tearOffLayers = document.getElementById('tearOffLayers').value;
+            const slope = document.getElementById('slope').value;
+            const complexity = document.getElementById('complexity').value;
+            const hipsAndValleys = parseFloat(document.getElementById('hipsAndValleys').value) || 0;
+            const sheetingReplaced = parseFloat(document.getElementById('sheetingReplaced').value) || 0;
+            const sheetingType = document.getElementById('sheetingType').value;
+
+            let price = 0;
+            const squares = squareFootage / 100;
+
+            // Base rate
+            if (roofType === 'shingles') price += squares * 700;
+            else if (roofType === 'corrugated') price += squares * 750;
+            else if (roofType === 'standing-seam') price += squares * 1000;
+
+            // Tear off
+            if (tearOffLayers === '2') price += squares * 50;
+            else if (tearOffLayers === '3+') price += squares * 100;
+
+            // Slope
+            if (roofType === 'shingles') {
+                if (slope === '7/12-9/12') price += squares * 100;
+                else if (slope === '10/12-12/12') price += squares * 150;
+            } else {
+                if (slope === '9/12-12/12') price += squares * 50;
+            }
+
+            // Complexity
+            if (complexity === 'hips-and-valleys') {
+                if (roofType === 'shingles') price += hipsAndValleys * 10;
+                else if (roofType === 'corrugated') price += hipsAndValleys * 20;
+                else if (roofType === 'standing-seam') price += hipsAndValleys * 30;
+            }
+
+            // Sheeting
+            if (roofType === 'shingles') {
+                price += sheetingReplaced * 100;
+            } else {
+                if (sheetingType === 'osb') price += sheetingReplaced * 100;
+                else if (sheetingType === 'plywood') price += sheetingReplaced * 200;
+            }
+
+            const totalPrice = Math.round(price * 100) / 100;
+            document.getElementById('result').textContent = `Total Price: $${totalPrice.toLocaleString()}`;
+        }
+
+        // Add event listeners
+        document.getElementById('roofType').addEventListener('change', updateUI);
+        document.getElementById('complexity').addEventListener('change', updateUI);
+
+        // Initial UI update
+        updateUI();
+    </script>
+</body>
+</html>
